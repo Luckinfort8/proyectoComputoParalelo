@@ -5,9 +5,7 @@ import time
 
 website = "https://www.adamchoi.co.uk/teamgoals/detailed"
 
-# Descargar el chromedriver correspondiente a la versión de Chrome instalada y carmbiar
-# la carpeta chromedriver-win64 por la que se descargó
-path = "../chromedriver-linux64/chromedriver"
+path = "../chromedriver-win64/chromedriver.exe"
 
 driver = webdriver.Chrome(path)
 driver.get(website)
