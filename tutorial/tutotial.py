@@ -7,7 +7,7 @@ website = "https://www.adamchoi.co.uk/teamgoals/detailed"
 
 # Descargar el chromedriver correspondiente a la versión de Chrome instalada y carmbiar
 # la carpeta chromedriver-win64 por la que se descargó
-path = "../chromedriver-win64/chromedriver.exe"
+path = "../chromedriver-linux64/chromedriver"
 
 driver = webdriver.Chrome(path)
 driver.get(website)
