@@ -11,21 +11,19 @@ def get_data():
     website = "https://www.adamchoi.co.uk/teamgoals/detailed"
 
     options = webdriver.ChromeOptions()
-    options.binary_location = '/usr/bin/google-chrome-stable' if platform.system() == 'Linux' else 'C:/Program Files/Google/Chrome/Application/chrome.exe'
+    linux_path = '/usr/bin/google-chrome-stable'
+    windows_path = 'C:/Program Files/Google/Chrome/Application/chrome.exe'
+    options.binary_location = linux_path if platform.system() == 'Linux' else windows_path
 
     driver = webdriver.Chrome(options)
     driver.get(website)
 
     all_matches_button = driver.find_element(By.XPATH, '//label[@analytics-event="All matches"]')
     all_matches_button.click()
-
-    time.sleep(4)
+    driver.implicitly_wait(3)
 
     dropdown = Select(driver.find_element(By.ID, 'country'))
     dropdown.select_by_visible_text('Spain')
-
-    time.sleep(4)
-
     matches = driver.find_elements(By.TAG_NAME, 'tr')
 
     date = []
