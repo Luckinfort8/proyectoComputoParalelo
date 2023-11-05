@@ -1,31 +1,35 @@
 import time
 import platform
 
-import requests
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
-import requests
 from bs4 import BeautifulSoup
-import pandas as pd
 
 
-def chedraui_driver(items):
-    website = "https://www.chedraui.com.mx"
+def chedraui_driver(items, best_item):
     chrome_path = '/usr/bin/google-chrome-stable' if platform.system() == 'Linux' else 'C:/Program Files/Google/Chrome/Application/chrome.exe'
 
     options = webdriver.ChromeOptions()
     options.binary_location = chrome_path
 
+    total_info = dict()
     with webdriver.Chrome(options=options) as driver:
-        total_info = []
         item, bad_words, characteristics = items
         search_queries = [(f'{item} {charac}', restr) for charac, restr in characteristics]
         for search_query in search_queries:
             html = search_chedraui(driver, search_query[0])
             info = find_gallery_items(html, search_query[1], bad_words)
-            total_info.append((search_query, info))
-    return total_info
+            if info is None:
+                continue
+            infodict = {
+                'name': info[0],
+                'price': info[1],
+                'image': info[2],
+                'store': info[3],
+            }
+            total_info[search_query[0]] = infodict
+        best_item.add_item(total_info)
 
 
 def search_chedraui(driver, query):
@@ -49,24 +53,31 @@ def find_gallery_items(html, restriction, bad_words):
     for product in product_list:
         img = product.find('img')
         if img is None:
+            # print(f'No se encontro imagen para producto')
             continue
         name = img['alt']
         image = img['src']
-        if not (name.find(restriction) != -1):
+        if not (name.lower().find(restriction) != -1):
+            # print(f'Restriccion {restriction} no encontrada en {name}')
             continue
         breaking = False
         for bad_word in bad_words:
             if (name.lower().find(bad_word)) != -1:
+                # print(f'Bad word {bad_word} found in {name}')
                 breaking = True
                 break
         if breaking:
             continue
         spam_general = product.select_one('span.vtex-product-price-1-x-currencyContainer')
         if spam_general is None:
+            # print(f'No se encontro precio para {name}')
             continue
         text = []
         for spam in spam_general.find_all('span'):
             text.append(spam.text)
         price = ''.join(text)
         info.append((name, price, image, 'chedraui'))
-    return info
+    info.sort(key=lambda x: x[1])
+    if len(info) > 0:
+        return info[0]
+    return None

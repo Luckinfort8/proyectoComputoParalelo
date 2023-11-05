@@ -26,6 +26,7 @@ def walmart_driver(items):
             total_info.append((search_query, info))
     return total_info
 
+
 def search_walmart(driver, query):
     driver.get("https://www.walmart.com.mx")
     time.sleep(3)
@@ -37,6 +38,7 @@ def search_walmart(driver, query):
     time.sleep(10)
     html = driver.find_element(By.CSS_SELECTOR, 'body').get_attribute('outerHTML')
     return html
+
 
 def find_gallery_items(html, restriction, bad_words):
     soup = BeautifulSoup(html, 'html.parser')
