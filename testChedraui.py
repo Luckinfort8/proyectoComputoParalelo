@@ -1,6 +1,7 @@
 from drivers.chedraui import chedraui_driver
 from drivers.walmart import walmart_driver
 from drivers.amazon import amazon_driver
+from drivers.soriana import soriana_driver
 
 
 def main():
