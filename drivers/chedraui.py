@@ -19,7 +19,7 @@ def chedraui_driver(items):
 
     with webdriver.Chrome(options=options) as driver:
         total_info = []
-        item, bad_words ,characteristics = items
+        item, bad_words, characteristics = items
         search_queries = [(f'{item} {charac}', restr) for charac, restr in characteristics]
         for search_query in search_queries:
             html = search_chedraui(driver, search_query[0])

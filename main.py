@@ -6,7 +6,11 @@ import matplotlib.pyplot as plt
 from multiprocessing import Process
 
 list_prodcuts = [
-    ('television', ['32 pulgadas', '55 pulgadas', '65 pulgadas', '75 pulgadas']),
-    ('laptop', ['i3', 'i5', 'i7', 'i9']),
+    ('television', ['soporte'],
+     [('32 pulgadas', '32'),
+      ('55 pulgadas', '55'),
+      ('65 pulgadas', '65'),
+      ('75 pulgadas', '75'),
+      ]),
 
 ]

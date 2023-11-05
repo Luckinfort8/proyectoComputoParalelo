@@ -2,7 +2,7 @@ from drivers.chedraui import chedraui_driver
 
 
 def main():
-    info_total = chedraui_driver(('television', 'soporte',
+    info_total = chedraui_driver(('television', ['soporte'],
                                   [('32 pulgadas', '32'),
                                    ('55 pulgadas', '55'),
                                    ('65 pulgadas', '65'),
