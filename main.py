@@ -1,5 +1,6 @@
 from multiprocessing import Process, Manager
 
+from drivers.amazon import amazon_driver
 from drivers.chedraui import chedraui_driver
 
 
@@ -35,7 +36,7 @@ def main():
           ]),
     ]
 
-    drivers = [chedraui_driver]
+    drivers = [chedraui_driver, amazon_driver]
     processes = []
 
     with Manager() as manager:
