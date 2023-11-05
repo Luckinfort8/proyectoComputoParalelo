@@ -1,10 +1,11 @@
 from drivers.chedraui import chedraui_driver
 from drivers.walmart import walmart_driver
+from drivers.amazon import amazon_driver
 
 
 def main():
 
-    info_total = walmart_driver(('television', ['soporte'],
+    info_total = amazon_driver(('television', ['soporte'],
                                     [('32 pulgadas', '32'),
                                     ('55 pulgadas', '55'),
                                     ('65 pulgadas', '65'),
