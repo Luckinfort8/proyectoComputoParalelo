@@ -1,4 +1,6 @@
 from multiprocessing import Process, Manager
+import pickle
+import subprocess 
 
 from drivers.amazon import amazon_driver
 from drivers.chedraui import chedraui_driver
@@ -93,6 +95,15 @@ def main():
             print(best_item.nombre)
             print(best_item.items)
 
+    # Guardar los diccionarios en archivos
+    for best_item in best_items:
+        product_name = best_item.nombre
+        data_to_save = best_item.items
+        with open(f'{product_name}_data.pkl', 'wb') as file:
+            pickle.dump(data_to_save, file)
+
+    # Después de guardar los diccionarios, ejecuta posterygrafica.py
+    #subprocess.run(["python", "posterygrafica.py"])
 
 if __name__ == '__main__':
     main()
