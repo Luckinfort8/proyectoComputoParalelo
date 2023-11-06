@@ -1,10 +1,9 @@
 from multiprocessing import Process, Manager
-import pickle
-import subprocess 
 
 from drivers.amazon import amazon_driver
 from drivers.chedraui import chedraui_driver
 from drivers.mercado_libre import ml_driver
+from posterygrafica import create_poster
 
 
 class BestItem:
@@ -47,36 +46,36 @@ def main():
           ('samsung', 'samsung'),
           ('frigidaire', 'frigidaire'),
           ]),
-        ('lavadora', ['secadora'],
-         [('lg', 'lg'),
-          ('mabe', 'mabe'),
-          ('daewoo', 'daewoo'),
-          ('frigidaire', 'frigidaire'),
-          ]),
-        ('estufa', ['microondas'],
-         [('lg', 'lg'),
-          ('mabe', 'mabe'),
-          ('samsung', 'samsung'),
-          ('frigidaire', 'frigidaire'),
-          ]),
-        ('aspiradora', ['escoba'],
-         [('lg', 'lg'),
-          ('mabe', 'mabe'),
-          ('daewoo', 'daewoo'),
-          ('frigidaire', 'frigidaire'),
-          ]),
-        ('licuadora', ['cafetera'],
-         [('lg', 'lg'),
-          ('mabe', 'mabe'),
-          ('samsung', 'samsung'),
-          ('frigidaire', 'frigidaire'),
-          ]),
-        ('cafetera', ['licuadora'],
-         [('lg', 'lg'),
-          ('mabe', 'mabe'),
-          ('daewoo', 'daewoo'),
-          ('frigidaire', 'frigidaire'),
-          ]),
+        # ('lavadora', ['secadora'],
+        #  [('lg', 'lg'),
+        #   ('mabe', 'mabe'),
+        #   ('daewoo', 'daewoo'),
+        #   ('frigidaire', 'frigidaire'),
+        #   ]),
+        # ('estufa', ['microondas'],
+        #  [('lg', 'lg'),
+        #   ('mabe', 'mabe'),
+        #   ('samsung', 'samsung'),
+        #   ('frigidaire', 'frigidaire'),
+        #   ]),
+        # ('aspiradora', ['escoba'],
+        #  [('lg', 'lg'),
+        #   ('mabe', 'mabe'),
+        #   ('daewoo', 'daewoo'),
+        #   ('frigidaire', 'frigidaire'),
+        #   ]),
+        # ('licuadora', ['cafetera'],
+        #  [('lg', 'lg'),
+        #   ('mabe', 'mabe'),
+        #   ('samsung', 'samsung'),
+        #   ('frigidaire', 'frigidaire'),
+        #   ]),
+        # ('cafetera', ['licuadora'],
+        #  [('lg', 'lg'),
+        #   ('mabe', 'mabe'),
+        #   ('daewoo', 'daewoo'),
+        #   ('frigidaire', 'frigidaire'),
+        #   ]),
     ]
 
     drivers = [chedraui_driver, amazon_driver, ml_driver]
@@ -94,16 +93,10 @@ def main():
         for best_item in best_items:
             print(best_item.nombre)
             print(best_item.items)
+            normal_dict = dict(best_item.items)
+            create_poster(normal_dict, best_item.nombre, "fondo.png")
 
-    # Guardar los diccionarios en archivos
-    for best_item in best_items:
-        product_name = best_item.nombre
-        data_to_save = best_item.items
-        with open(f'{product_name}_data.pkl', 'wb') as file:
-            pickle.dump(data_to_save, file)
 
-    # Después de guardar los diccionarios, ejecuta posterygrafica.py
-    #subprocess.run(["python", "posterygrafica.py"])
 
 if __name__ == '__main__':
     main()
