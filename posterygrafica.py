@@ -42,6 +42,7 @@ def create_poster(data, product_name, background_image_path):
         plt.title(f'Oferta en {item["store"]}\nTipo{key}\nPrecio: {item["price"]}\n{item["name"]}', color='white',
                   fontsize=18)  # Cambiar el color del título a blanco
         pdf_pages.savefig(poster)  # Guardar la página del póster en el PDF
+        plt.close()
 
     # 1. Gráfica de caja por tamaño/presentación del producto
     plt.figure(figsize=(8.5, 11))
@@ -52,6 +53,7 @@ def create_poster(data, product_name, background_image_path):
     plt.xlabel('Tienda')
     plt.tight_layout()
     pdf_pages.savefig()
+    plt.close()
 
     # 2. Gráfica de dispersión por tamaño/presentación
     df.sort_values(by='price', inplace=True)
@@ -63,6 +65,8 @@ def create_poster(data, product_name, background_image_path):
     plt.ylabel('Precio')
     plt.tight_layout()
     pdf_pages.savefig()
+    plt.close()
+
 
     # Guardar el PDF
     pdf_pages.close()
