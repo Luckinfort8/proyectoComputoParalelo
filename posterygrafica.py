@@ -1,45 +1,69 @@
-import pickle
 import matplotlib.pyplot as plt
-from niceposter import Poster
+import pandas as pd
+from matplotlib.backends.backend_pdf import PdfPages
+import requests
+from io import BytesIO
+from PIL import Image
 
-# Cargar los diccionarios desde los archivos
-best_items = []
-product_names = ['television', 'laptop']  # Asegúrate de tener los nombres correctos aquí
+def create_poster(data, product_name, background_image_path):
+    # Crear un DataFrame con los datos
+    df = pd.DataFrame(data).T
 
-for product_name in product_names:
-    with open(f'{product_name}_data.pkl', 'rb') as file:
-        data = pickle.load(file)
-        best_items.append((product_name, data))
+    # Encontrar el producto con el precio más bajo
+    min_price_item = min(data.values(), key=lambda x: float(x['price'].replace('$', '').replace(',', '')))
 
-# Gráficas y pósters para cada producto
-for product_name, data in best_items:
+    # Crear un archivo PDF para guardar las figuras y el póster
+    pdf_pages = PdfPages(f'{product_name}_result_poster.pdf')
+
     # 1. Gráfica de caja por tamaño/presentación del producto
-    plt.figure(figsize=(8, 6))
-    plt.boxplot([float(item['price']) for item in data.values()])
-    plt.xticks(range(1, len(data) + 1), data.keys(), rotation=45)
-    plt.title(f'Precios de {product_name} por tamaño/presentación')
+    plt.figure(figsize=(8.5, 11))
+    df['price'] = df['price'].str.replace('$', '').str.replace(',', '').astype(float)
+    df.boxplot(column='price', by='store', vert=False)
+    plt.title(f'Precios de {product_name} por tienda')
     plt.ylabel('Precio')
-    plt.xlabel('Tamaño/Presentación')
+    plt.xlabel('Tienda')
     plt.tight_layout()
-    plt.savefig(f'{product_name}_boxplot.png')
-    plt.show()
+    pdf_pages.savefig()
 
     # 2. Gráfica de dispersión por tamaño/presentación
-    prices = [float(item['price']) for item in data.values()]
-    sizes = list(data.keys())
-
-    plt.figure(figsize=(10, 6))
-    plt.scatter(sizes, prices, c=range(len(sizes)), cmap='viridis', marker='o')
+    df.sort_values(by='price', inplace=True)
+    plt.figure(figsize=(8.5, 11))
+    plt.scatter(df['store'], df['price'], c=range(len(df)), cmap='viridis', marker='o')
     plt.xticks(rotation=45)
     plt.title(f'Dispersión de precios de {product_name}')
-    plt.xlabel('Tamaño/Presentación')
+    plt.xlabel('Tienda')
     plt.ylabel('Precio')
     plt.tight_layout()
-    plt.savefig(f'{product_name}_scatter.png')
-    plt.show()
+    pdf_pages.savefig()
 
-    # Crear un póster para cada producto
-    poster = Poster()
-    poster.add_image(f'{product_name}_boxplot.png', 'Gráfica de caja')
-    poster.add_image(f'{product_name}_scatter.png', 'Gráfica de dispersión')
-    poster.create(f'{product_name}_result_poster.png', f'Resultados para {product_name}')
+    # Crear el póster
+    poster = plt.figure(figsize=(8.5, 11), facecolor='black')  # Establecer el fondo en negro
+    
+
+    # Obtener las dimensiones de la imagen de fondo
+    background_image = plt.imread(background_image_path)
+    img_width, img_height = background_image.shape[1], background_image.shape[0]
+
+    # Calcular las coordenadas para centrar la imagen de fondo en el póster
+    x_center = (8.5 * 72 - img_width) / 2
+    y_center = (11 * 72 - img_height) / 2
+
+    # Agregar la imagen de fondo al póster
+    poster.figimage(background_image, x_center, y_center, alpha=0.9)
+
+    # Añadir la imagen, mensaje de oferta, precio y tienda al póster del producto más barato
+    response = requests.get(min_price_item['image'])
+    img = Image.open(BytesIO(response.content))
+
+    # Calcular las coordenadas para colocar la imagen del producto
+    x_img = 180  # Puedes ajustar esta posición
+    y_img = 450  # Puedes ajustar esta posición
+
+    # Añadir la imagen del producto al póster
+    poster.figimage(img, x_img, y_img, alpha=1)
+    plt.axis('off')
+    plt.title(f'Oferta en {min_price_item["store"]}\nPrecio: {min_price_item["price"]}', color='white', fontsize=22)  # Cambiar el color del título a blanco
+    pdf_pages.savefig(poster)  # Guardar la página del póster en el PDF
+
+    # Guardar el PDF
+    pdf_pages.close()
