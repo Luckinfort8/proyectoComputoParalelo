@@ -1,14 +1,16 @@
 import time
 import platform
 
+import requests
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
+import requests
 from bs4 import BeautifulSoup
+import pandas as pd
 
-
-def chedraui_driver(items, best_item):
-    chrome_path = '/usr/bin/google-chrome-stable' if platform.system() == 'Linux' else 'C:/Program Files/Google/Chrome/Application/chrome.exe'
+def ml_driver(items, best_item):
+    chrome_path = '/usr/bin/google-chrome-stable' if platform.system() == 'Linux' else 'C:\Program Files (x86)\Google\Chrome\Application\chrome.exe'
 
     options = webdriver.ChromeOptions()
     options.binary_location = chrome_path
@@ -18,8 +20,8 @@ def chedraui_driver(items, best_item):
         item, bad_words, characteristics = items
         search_queries = [(f'{item} {charac}', restr) for charac, restr in characteristics]
         for search_query in search_queries:
-            html = search_chedraui(driver, search_query[0])
-            info = find_gallery_items(html, search_query[1], bad_words)
+            html = search_ml(driver, search_query[0])
+            info = find_ml_gallery(html, search_query[1], bad_words)
             if info is None:
                 continue
             infodict = {
@@ -32,24 +34,25 @@ def chedraui_driver(items, best_item):
         best_item.add_item(total_info)
 
 
-def search_chedraui(driver, query):
-    driver.get("https://www.chedraui.com.mx")
+def search_ml(driver, query):
+    driver.get("https://www.mercadolibre.com.mx/")
     time.sleep(3)
-    search_bar = driver.find_element(By.CSS_SELECTOR, 'input[placeholder="¿Qué estás buscando?"]')
+    search_bar = driver.find_element(By.CSS_SELECTOR, 'input[placeholder="Buscar productos, marcas y más…"]')
+    search_bar.clear()  # Limpiar cualquier texto existente en el campo de búsqueda
     search_bar.send_keys(query)
     search_bar.send_keys(Keys.RETURN)
     time.sleep(10)
     driver.execute_script('window.scrollTo(0, document.body.scrollHeight);')
-    time.sleep(10)
     html = driver.find_element(By.CSS_SELECTOR, 'body').get_attribute('outerHTML')
     return html
 
 
-def find_gallery_items(html, restriction, bad_words):
+def find_ml_gallery(html, restriction, bad_words):
     soup = BeautifulSoup(html, 'html.parser')
-    prodoct_gallery = soup.find('div', {'id': 'gallery-layout-container'})
-    product_list = prodoct_gallery.find_all('div', recursive=False)
+    product_gallery = soup.find('ol', {'class': 'ui-search-layout ui-search-layout--stack'})
+    product_list = product_gallery.find_all('li', recursive=False)
     info = []
+
     for product in product_list:
         img = product.find('img')
         if img is None:
@@ -70,16 +73,14 @@ def find_gallery_items(html, restriction, bad_words):
                 break
         if breaking:
             continue
-        spam_general = product.select_one('span.vtex-product-price-1-x-currencyContainer')
+        spam_general = product.select_one('span.andes-money-amount__fraction')
         if spam_general is None:
             # print(f'No se encontro precio para {name}')
             continue
-        text = []
-        for spam in spam_general.find_all('span'):
-            text.append(spam.text)
-        price = ''.join(text)
-        info.append((name, price, image, 'chedraui'))
-    info.sort(key=lambda x: x[1])
+        price = f"${spam_general.text}.00"
+        info.append((name, price, image, 'mercado libre'))
+
+    info.sort(key=lambda x: x[1])  # Sort by price (assuming 'price' is a numeric value)
     if len(info) > 0:
         return info[0]
     return None

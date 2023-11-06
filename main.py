@@ -2,7 +2,7 @@ from multiprocessing import Process, Manager
 
 from drivers.amazon import amazon_driver
 from drivers.chedraui import chedraui_driver
-from drivers.soriana import soriana_driver
+from drivers.mercado_libre import ml_driver
 
 
 class BestItem:
@@ -30,14 +30,54 @@ def main():
         ('laptop', ['mouse', 'audifonos'],
          [('lenovo', 'lenovo'),
           ('hp', 'hp'),
-          ('acer', 'acer'),
-          ('asus', 'asus'),
           ('dell', 'dell'),
           ('macbook', 'macbook'),
           ]),
+        ('celular', ['cargador', 'audifonos'],
+         [('samsung', 'samsung'),
+          ('iphone', 'iphone'),
+          ('motorola', 'motorola'),
+          ('nokia', 'nokia'),
+          ]),
+        ('refrigerador', ['licuadora'],
+         [('lg', 'lg'),
+          ('mabe', 'mabe'),
+          ('samsung', 'samsung'),
+          ('frigidaire', 'frigidaire'),
+          ]),
+        ('lavadora', ['secadora'],
+         [('lg', 'lg'),
+          ('mabe', 'mabe'),
+          ('daewoo', 'daewoo'),
+          ('frigidaire', 'frigidaire'),
+          ]),
+        ('estufa', ['microondas'],
+         [('lg', 'lg'),
+          ('mabe', 'mabe'),
+          ('samsung', 'samsung'),
+          ('frigidaire', 'frigidaire'),
+          ]),
+        ('aspiradora', ['escoba'],
+         [('lg', 'lg'),
+          ('mabe', 'mabe'),
+          ('daewoo', 'daewoo'),
+          ('frigidaire', 'frigidaire'),
+          ]),
+        ('licuadora', ['cafetera'],
+         [('lg', 'lg'),
+          ('mabe', 'mabe'),
+          ('samsung', 'samsung'),
+          ('frigidaire', 'frigidaire'),
+          ]),
+        ('cafetera', ['licuadora'],
+         [('lg', 'lg'),
+          ('mabe', 'mabe'),
+          ('daewoo', 'daewoo'),
+          ('frigidaire', 'frigidaire'),
+          ]),
     ]
 
-    drivers = [chedraui_driver, amazon_driver, soriana_driver]
+    drivers = [chedraui_driver, amazon_driver, ml_driver]
     processes = []
 
     with Manager() as manager:

@@ -54,6 +54,8 @@ def find_gallery_items(html, restriction, bad_words):
             continue
         name = img['alt']
         image = img['src']
+        if image[:4] != 'http':
+            continue
         if not (name.find(restriction) != -1):
             continue
         breaking = False
