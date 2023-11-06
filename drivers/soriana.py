@@ -9,30 +9,35 @@ import requests
 from bs4 import BeautifulSoup
 import pandas as pd
 
-def soriana_driver(items):
-    website = "https://www.soriana.com"
-    chrome_path = '/usr/bin/google-chrome-stable' if platform.system() == 'Linux' else 'C:/Program Files/Google/Chrome/Application/chrome.exe'
+def soriana_driver(items, best_item):
+    chrome_path = '/usr/bin/google-chrome-stable' if platform.system() == 'Linux' else 'C:\Program Files (x86)\Google\Chrome\Application\chrome.exe'
 
     options = webdriver.ChromeOptions()
     options.binary_location = chrome_path
 
+    total_info = dict()
     with webdriver.Chrome(options=options) as driver:
-        total_info = []
         item, bad_words, characteristics = items
         search_queries = [(f'{item} {charac}', restr) for charac, restr in characteristics]
         for search_query in search_queries:
-            for page_number in range(1, 9):  # Modify the range to scrape multiple pages
-                page_url = f"https://www.soriana.com/electronica/equipos-de-computo/laptops/?&start=0&sz=25&pageNumber={page_number}&forceOldView=false&view=grid&cref=0&cgid=laptops"
-                html = search_soriana(driver, page_url, search_query[0])
-                info = find_gallery_items(html, search_query[1], bad_words)
-                total_info.append((search_query, info))
-    return total_info
+            html = search_soriana(driver, search_query[0])
+            info = find_soriana_gallery_items(html, search_query[1], bad_words)
+            if info is None:
+                continue
+            infodict = {
+                'name': info[0],
+                'price': info[1],
+                'image': info[2],
+                'store': info[3],
+            }
+            total_info[search_query[0]] = infodict
+        best_item.add_item(total_info)
 
-def search_soriana(driver, page_url, query):
-    driver.get(page_url)
+def search_soriana(driver, query):
+    driver.get("https://www.soriana.com/")
     time.sleep(3)
-    search_bar = driver.find_element(By.NAME, 'q')
-    search_bar.clear()
+    search_bar = driver.find_element(By.CSS_SELECTOR, 'input[id="searchBtnTrack"]')
+    search_bar.clear()  # Limpiar cualquier texto existente en el campo de búsqueda
     search_bar.send_keys(query)
     search_bar.send_keys(Keys.RETURN)
     time.sleep(10)
@@ -41,43 +46,38 @@ def search_soriana(driver, page_url, query):
     html = driver.find_element(By.CSS_SELECTOR, 'body').get_attribute('outerHTML')
     return html
 
-# Rest of the code remains the same for finding and extracting product information
+from bs4 import BeautifulSoup
 
-# Example of how to use the `soriana_driver` function
-items = ("TV", ["Smart", "LED"], [("Full HD", "Full HD")])
-result = soriana_driver(items)
-print(result)
-
-
-def find_gallery_items(html, restriction, bad_words):
+def find_soriana_gallery_items(html, restriction, bad_words):
     soup = BeautifulSoup(html, 'html.parser')
-    product_list = soup.find_all('div', class_='col-4 col-sm-3 col-md-2-4 product-tile--wrapper')
+    product_list = soup.find_all('div', class_='product-tile plp custom-product-tile position-relative js-product-card')
 
     info = []
+
     for product in product_list:
         product_info = {}
-        
+
         # Extract product name
-        product_name = product.find('a', class_='plp-link')
+        product_name = product.find('a', class_='link plp-link font-primary--medium product-tile--link ellipsis-product-name font-size-16')
         if product_name:
             product_info['name'] = product_name.text.strip()
 
-        # Extract product brand
-        product_brand = product.find('a', class_='product-tile--brand-link')
-        if product_brand:
-            product_info['brand'] = product_brand.text.strip()
-
         # Extract product image
-        product_image = product.find('img', class_='tile-image')
+        product_image = product.find('img', class_='tile-image content-visibility-auto lazyload img-dimentions')
         if product_image:
             product_info['image'] = product_image['data-src']
 
+        # Extract product brand
+        product_brand = product.find('a', class_='product-tile--brand-link ellipsis-brand-name font-size-14')
+        if product_brand:
+            product_info['brand'] = product_brand.text.strip()
+
         # Extract product price
-        product_price = product.find('span', class_='sales')
+        product_price = product.find('span', class_='font-primary--bold font-size-14 cart-price price-plp price-not-found price-pdp')
         if product_price:
             product_info['price'] = product_price.text.strip()
 
-        # Check if product meets the restriction and bad words criteria
+        # Check if the product meets the restriction and bad words criteria
         if (
             'name' in product_info
             and 'price' in product_info
@@ -92,4 +92,7 @@ def find_gallery_items(html, restriction, bad_words):
             if not breaking:
                 info.append(product_info)
 
-    return info
+    info.sort(key=lambda x: x['price'])  # Sort by price (assuming 'price' is a numeric value)
+    if len(info) > 0:
+        return info[0]
+    return None
