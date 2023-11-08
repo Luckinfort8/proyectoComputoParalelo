@@ -46,7 +46,9 @@ def create_poster(data, product_name, background_image_path):
 
     # 1. Gráfica de caja por tamaño/presentación del producto
     plt.figure(figsize=(8.5, 11))
-    df['price'] = df['price'].str.replace('$', '').str.replace(',', '').astype(float)
+    # If you are replacing a single character and it's not a regex pattern, set regex=False
+    df['price'] = df['price'].str.replace('$', '', regex=False).str.replace(',', '', regex=False).astype(float)
+
     df.boxplot(column='price', by='store', vert=False)
     plt.title(f'Precios de {product_name} por tienda')
     plt.ylabel('Precio')

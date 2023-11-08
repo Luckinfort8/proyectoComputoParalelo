@@ -10,7 +10,7 @@ from bs4 import BeautifulSoup
 import pandas as pd
 
 def ml_driver(items, best_item):
-    chrome_path = '/usr/bin/google-chrome-stable' if platform.system() == 'Linux' else 'C:\Program Files (x86)\Google\Chrome\Application\chrome.exe'
+    chrome_path = '/usr/bin/google-chrome-stable' if platform.system() == 'Linux' else 'C:/Program Files/Google/Chrome/Application/chrome.exe'
 
     options = webdriver.ChromeOptions()
     options.binary_location = chrome_path
